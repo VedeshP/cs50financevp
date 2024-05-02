@@ -1,6 +1,7 @@
 import os
 
-from cs50 import SQL
+#from cs50 import SQL
+from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, flash, redirect, render_template, request, session, jsonify
 from flask_session import Session
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -20,8 +21,13 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Configure CS50 Library to use SQLite database
-db = SQL("sqlite:///finance.db")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///finance.db'
+
+
+''' Configure CS50 Library to use SQLite database
+db = SQL("sqlite:///finance.db")'''
+
+db = SQLAlchemy(app)
 
 
 @app.after_request
@@ -347,9 +353,7 @@ def add_cash():
             return apology("Incorrect Password!", 403)
         if add_cash > 10000:
             return apology("Cannot add more than $10,000 once", 403)
-        cash_db = db.execute("SELECT cash FROM users WHERE id = ?", user_id)
-        db.execute("UPDATE users SET cash = ? + ? WHERE id = ?",
-                   cash_db[0]["cash"], add_cash, user_id)
+
 
         flash("Cash Added!")
         return redirect("/")
